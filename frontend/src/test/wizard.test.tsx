@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render } from "@testing-library/react";
 import { RequirementWizard } from "@/components/requirement-form/RequirementWizard";
 
 // Mock the API module
@@ -38,7 +37,12 @@ vi.mock("@/store/requirementStore", async () => {
     clearDraft: vi.fn(),
   }));
 
-  return { useRequirementStore, getActiveCategory: vi.fn(), getActiveDetails: vi.fn() };
+  return {
+    useRequirementStore,
+    getCompletedStepsSet: vi.fn(() => new Set<number>()),
+    getActiveCategory: vi.fn(),
+    getActiveDetails: vi.fn(),
+  };
 });
 
 describe("RequirementWizard", () => {

@@ -66,8 +66,9 @@ export function RequirementWizard() {
   const [showSuccess, setShowSuccess] = React.useState(false);
   const headingRef = React.useRef<HTMLHeadingElement>(null);
 
-  // SSR hydration safety: don't read localStorage until mounted
+  // SSR hydration safety: don't read localStorage until mounted.
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true);
   }, []);
 

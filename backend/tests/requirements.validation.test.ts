@@ -98,7 +98,6 @@ describe("Date validation", () => {
 
 describe("Common validation", () => {
   it("rejects missing required field (eventName) (400)", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { eventName: _omit, ...noName } = { ...BASE, dateMode: "single", startDate: futureDate(10) };
     const res = await request(app).post("/api/requirements").send(noName);
     expect(res.status).toBe(400);

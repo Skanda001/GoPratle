@@ -7,7 +7,7 @@ import { Calendar, MapPin, CalendarRange } from "lucide-react";
 import { basicsSchema, type BasicsFormData } from "@/lib/validation";
 import { EVENT_TYPE_LABELS } from "@/lib/constants";
 import { getTodayString } from "@/lib/utils";
-import { TextField, SelectField, TextAreaField } from "@/components/ui/Fields";
+import { TextField, SelectField } from "@/components/ui/Fields";
 import type { BasicsFormData as BasicsData } from "@/types";
 
 interface CategoryCardData {
@@ -70,6 +70,7 @@ export function Step1EventBasics({ defaultValues, onSubmit, formId }: Step1Props
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const dateMode = watch("dateMode");
   const today = getTodayString();
 
