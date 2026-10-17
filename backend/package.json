@@ -1,0 +1,54 @@
+{
+  "name": "gopratle-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GoPratle backend – Express + TypeScript + MongoDB",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests scripts",
+    "lint:fix": "eslint src tests scripts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"scripts/**/*.ts\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.13.4",
+    "@types/supertest": "^6.0.2",
+    "@typescript-eslint/eslint-plugin": "^8.24.1",
+    "@typescript-eslint/parser": "^8.24.1",
+    "@vitest/coverage-v8": "^3.0.7",
+    "eslint": "^9.20.1",
+    "mongodb-memory-server": "^10.1.4",
+    "prettier": "^3.4.2",
+    "supertest": "^7.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7"
+  },
+  "allowScripts": {
+    "mongodb-memory-server@10.4.3": true,
+    "esbuild@0.28.2": true
+  }
+}
