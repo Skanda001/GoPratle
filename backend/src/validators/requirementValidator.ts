@@ -123,7 +123,7 @@ const plannerDetailsSchema = z.object({
   coordinationDays: z.number().int().min(1).max(90),
   preferredExperience: z.enum(EXPERIENCE_LEVELS).optional(),
   specialRequests: optionalString(1000),
-});
+}).strict();
 
 // ---------------------------------------------------------------------------
 // Performer details validator
@@ -144,6 +144,7 @@ const performerDetailsSchema = z
     budgetMax: z.number().min(0).optional(),
     budgetCurrency: z.enum(CURRENCIES).default("INR"),
   })
+  .strict()
   .superRefine((data, ctx) => {
     if (
       data.budgetMin !== undefined &&
@@ -171,7 +172,7 @@ const crewDetailsSchema = z.object({
   dressCode: optionalString(200),
   reportingInstructions: optionalString(500),
   specialRequests: optionalString(1000),
-});
+}).strict();
 
 // ---------------------------------------------------------------------------
 // Combined discriminated union validator (strict mode)
@@ -191,11 +192,9 @@ const crewSchema = dateRefinement
   .strict()
   .superRefine(refineDates);
 
-export const requirementValidator = z.discriminatedUnion("category", [
-  plannerSchema,
-  performerSchema,
-  crewSchema,
-]);
+// Note: z.discriminatedUnion requires plain ZodObject options but .superRefine()
+// wraps schemas in ZodEffects. Using z.union preserves all validation behaviour.
+export const requirementValidator = z.union([plannerSchema, performerSchema, crewSchema]);
 
 // ---------------------------------------------------------------------------
 // Query validators

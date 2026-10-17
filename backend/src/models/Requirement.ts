@@ -158,7 +158,7 @@ const baseSchema = new Schema<RequirementDocument>(
     location: { type: String, required: true, trim: true, minlength: 2, maxlength: 100 },
     venue: { type: String, trim: true, maxlength: 100 },
     status: { type: String, enum: STATUSES, default: "submitted" },
-    idempotencyKey: { type: String, sparse: true },
+    idempotencyKey: { type: String },
   },
   {
     timestamps: true,

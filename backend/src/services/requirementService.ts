@@ -5,13 +5,12 @@ import PlannerRequirementModel from "../models/PlannerRequirement.js";
 import PerformerRequirementModel from "../models/PerformerRequirement.js";
 import CrewRequirementModel from "../models/CrewRequirement.js";
 import type { RequirementDocument, Category } from "../models/Requirement.js";
-import type { CreateRequirementInput, ListQueryInput } from "../validators/requirementValidator.js";
+import type { ListQueryInput } from "../validators/requirementValidator.js";
 
-// Ensure discriminator models are registered before any query
-function _ensureModels() {
-  return { PlannerRequirementModel, PerformerRequirementModel, CrewRequirementModel };
-}
-_ensureModels();
+// Touch discriminator models to register them before any query runs
+void PlannerRequirementModel;
+void PerformerRequirementModel;
+void CrewRequirementModel;
 
 // ---------------------------------------------------------------------------
 // Map category → discriminator model
@@ -40,7 +39,8 @@ export async function createRequirement(
     throw { type: "validation", errors: parsed.error.issues };
   }
 
-  const data = parsed.data as CreateRequirementInput;
+  const data = parsed.data;
+  const category = data.category as Category;
 
   // Idempotency check
   if (idempotencyKey) {
@@ -50,7 +50,7 @@ export async function createRequirement(
     }
   }
 
-  const Model = getModelForCategory(data.category);
+  const Model = getModelForCategory(category);
 
   const docData: Record<string, unknown> = {
     eventName: data.eventName,
@@ -64,8 +64,10 @@ export async function createRequirement(
     ...(idempotencyKey && { idempotencyKey }),
   };
 
-  const doc = await Model.create(docData);
-  return { doc: doc.toObject() as RequirementDocument, created: true };
+  // Using Model as any to work around TypeScript's union call signature incompatibility
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const created = await (Model as any).create(docData) as RequirementDocument;
+  return { doc: created.toObject ? created.toObject() as RequirementDocument : created, created: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -97,21 +99,20 @@ export async function listRequirements(rawQuery: unknown): Promise<ListResult> {
 
   const { category, page, limit } = parsed.data as ListQueryInput;
   const filter: FilterQuery<RequirementDocument> = {};
-  if (category) filter.category = category;
+  if (category) filter["category"] = category;
 
   const skip = (page - 1) * limit;
   const [data, total] = await Promise.all([
-    RequirementModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean<RequirementDocument[]>(),
+    RequirementModel.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean<RequirementDocument[]>(),
     RequirementModel.countDocuments(filter),
   ]);
 
   return {
     data,
-    meta: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
   };
 }

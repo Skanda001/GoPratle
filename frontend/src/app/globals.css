@@ -1,26 +1,47 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ---------------------------------------------------------------------------
+   Design tokens — change the accent in ONE place
+   --------------------------------------------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-violet-50: oklch(0.97 0.03 292);
+  --color-violet-100: oklch(0.94 0.06 292);
+  --color-violet-200: oklch(0.89 0.10 292);
+  --color-violet-300: oklch(0.82 0.14 292);
+  --color-violet-400: oklch(0.73 0.18 292);
+  --color-violet-500: oklch(0.64 0.22 292);
+  --color-violet-600: oklch(0.55 0.24 292);
+  --color-violet-700: oklch(0.46 0.22 292);
+  --color-violet-800: oklch(0.38 0.18 292);
+  --color-violet-900: oklch(0.30 0.14 292);
+
+  /* Accent — one variable to rule them all */
+  --accent: var(--color-violet-600);
+
+  --font-sans: var(--font-plus-jakarta-sans), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: oklch(0.98 0.002 264);
+  color: oklch(0.20 0.02 264);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus ring — visible but not distracting */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

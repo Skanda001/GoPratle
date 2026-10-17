@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import type { ZodIssue } from "zod";
 import * as service from "../services/requirementService.js";
 import { getDBStatus } from "../config/db.js";
 import { sendSuccess, sendError, sendValidationError } from "../utils/response.js";
@@ -17,11 +18,18 @@ export async function createRequirement(
       return;
     }
 
-    const idempotencyKey = req.headers["idempotency-key"] as string | undefined;
+    const idempotencyKey =
+      typeof req.headers["idempotency-key"] === "string"
+        ? req.headers["idempotency-key"]
+        : undefined;
+
     const { doc, created } = await service.createRequirement(req.body, idempotencyKey);
 
     res.status(created ? 201 : 200).json(
-      sendSuccess(created ? "Requirement created successfully" : "Requirement already exists", doc)
+      sendSuccess(
+        created ? "Requirement created successfully" : "Requirement already exists",
+        doc
+      )
     );
   } catch (err) {
     if (isValidationError(err)) {
@@ -41,7 +49,7 @@ export async function getRequirementById(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { id } = req.params;
+    const id = typeof req.params["id"] === "string" ? req.params["id"] : "";
     if (!id) {
       res.status(404).json(sendError("Requirement not found"));
       return;
@@ -69,7 +77,9 @@ export async function listRequirements(
 ): Promise<void> {
   try {
     const result = await service.listRequirements(req.query);
-    res.status(200).json(sendSuccess("Requirements retrieved successfully", result.data, result.meta));
+    res
+      .status(200)
+      .json(sendSuccess("Requirements retrieved successfully", result.data, result.meta));
   } catch (err) {
     if (isValidationError(err)) {
       res.status(400).json(sendValidationError(err.errors));
@@ -99,7 +109,7 @@ export function healthCheck(_req: Request, res: Response): void {
 // ---------------------------------------------------------------------------
 interface ServiceValidationError {
   type: "validation";
-  errors: { code: string; path: (string | number)[]; message: string }[];
+  errors: ZodIssue[];
 }
 
 function isValidationError(err: unknown): err is ServiceValidationError {
