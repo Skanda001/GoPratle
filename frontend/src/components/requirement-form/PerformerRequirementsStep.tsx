@@ -1,29 +1,24 @@
 "use client";
 
+import * as React from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ReceiptText } from "lucide-react";
 import { CategoryRequirementsStep, type FieldConfig } from "./CategoryRequirementsStep";
 import { performerStep2Schema, performerStep3Schema } from "@/lib/validation";
-import {
-  PERFORMANCE_TYPE_LABELS,
-  CURRENCY_LABELS,
-} from "@/lib/constants";
+import { PERFORMANCE_TYPE_LABELS } from "@/lib/constants";
+import { NumberField, SelectField, TextField } from "@/components/ui/Fields";
 import type { PerformerDetails } from "@/types";
 
-const PERF_TYPE_OPTIONS = Object.entries(PERFORMANCE_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l }));
-const CURRENCY_OPTIONS = Object.entries(CURRENCY_LABELS).map(([v, l]) => ({ value: v, label: l }));
+// ---------------------------------------------------------------------------
+// Options
+// ---------------------------------------------------------------------------
 
-const STEP2_FIELDS: FieldConfig[] = [
-  {
-    type: "select",
-    name: "performanceType",
-    label: "Performance Type",
-    options: PERF_TYPE_OPTIONS,
-    placeholder: "Select type",
-  },
-  { type: "number", name: "performerCount", label: "Number of Performers", min: 1, max: 50, placeholder: "e.g. 1" },
-  { type: "number", name: "durationMinutes", label: "Performance Duration (minutes)", min: 5, max: 720, placeholder: "e.g. 90" },
-  { type: "number", name: "performanceCount", label: "Number of Performances", min: 1, max: 20, placeholder: "e.g. 1" },
-  { type: "text", name: "genre", label: "Genre / Style", optional: true, placeholder: "e.g. Bollywood, EDM" },
-];
+const PERF_TYPE_OPTIONS = Object.entries(PERFORMANCE_TYPE_LABELS).map(([v, l]) => ({ value: v, label: l }));
+
+// ---------------------------------------------------------------------------
+// Step 3 fields
+// ---------------------------------------------------------------------------
 
 const STEP3_FIELDS: FieldConfig[] = [
   { type: "radio-yes-no", name: "soundSystemRequired", label: "Sound System Required" },
@@ -38,23 +33,22 @@ const STEP3_FIELDS: FieldConfig[] = [
     maxLength: 500,
   },
   {
-    type: "currency-amount",
+    type: "number",
     name: "budgetMin",
-    amountName: "budgetMin",
-    currencyName: "budgetCurrency",
-    label: "Budget Min",
+    label: "Minimum Budget (₹ INR)",
     optional: true,
-    currencies: CURRENCY_OPTIONS,
+    min: 0,
+    placeholder: "e.g. 25000",
+    hint: "Typical range: ₹5K–₹50K for solo, ₹25K–₹2L for bands/DJs",
   },
   {
-    type: "currency-amount",
+    type: "number",
     name: "budgetMax",
-    amountName: "budgetMax",
-    currencyName: "budgetCurrency",
-    label: "Budget Max",
+    label: "Maximum Budget (₹ INR)",
     optional: true,
-    hint: "Must be ≥ budget min",
-    currencies: CURRENCY_OPTIONS,
+    min: 0,
+    placeholder: "e.g. 80000",
+    hint: "Must be ≥ minimum budget",
   },
   {
     type: "textarea",
@@ -66,6 +60,10 @@ const STEP3_FIELDS: FieldConfig[] = [
   },
 ];
 
+// ---------------------------------------------------------------------------
+// PerformerStep2
+// ---------------------------------------------------------------------------
+
 interface PerformerStep2Props {
   formId: string;
   defaultValues: Partial<PerformerDetails>;
@@ -73,22 +71,137 @@ interface PerformerStep2Props {
 }
 
 export function PerformerStep2({ formId, defaultValues, onSubmit }: PerformerStep2Props) {
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(performerStep2Schema),
+    defaultValues: {
+      performanceType: defaultValues.performanceType,
+      performerCount: defaultValues.performerCount,
+      durationMinutes: defaultValues.durationMinutes,
+      performanceCount: defaultValues.performanceCount,
+      genre: defaultValues.genre ?? "",
+    },
+  });
+
+  const performanceType = watch("performanceType");
+
   return (
-    <CategoryRequirementsStep
-      formId={formId}
-      schema={performerStep2Schema}
-      defaultValues={{
-        performanceType: defaultValues.performanceType,
-        performerCount: defaultValues.performerCount,
-        durationMinutes: defaultValues.durationMinutes,
-        performanceCount: defaultValues.performanceCount,
-        genre: defaultValues.genre ?? "",
-      }}
-      fields={STEP2_FIELDS}
-      onSubmit={onSubmit}
-    />
+    <form id={formId} onSubmit={handleSubmit(onSubmit)} noValidate>
+      <div className="space-y-5">
+        {/* Performance Type */}
+        <SelectField
+          id="performanceType"
+          label="Performance Type"
+          options={PERF_TYPE_OPTIONS}
+          placeholder="Select type"
+          error={errors.performanceType}
+          registration={register("performanceType")}
+        />
+
+        {/* Performer Count */}
+        <Controller
+          name="performerCount"
+          control={control}
+          render={({ field: f }) => (
+            <NumberField
+              id="performerCount"
+              label="Number of Performers"
+              min={1}
+              max={50}
+              placeholder="e.g. 1"
+              error={errors.performerCount}
+              registration={{
+                ...f,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const v = e.target.value;
+                  f.onChange(v === "" ? undefined : Number(v));
+                },
+                value: f.value === undefined ? "" : String(f.value),
+              }}
+            />
+          )}
+        />
+
+        {/* Duration */}
+        <Controller
+          name="durationMinutes"
+          control={control}
+          render={({ field: f }) => (
+            <NumberField
+              id="durationMinutes"
+              label="Performance Duration (minutes)"
+              min={5}
+              max={720}
+              placeholder="e.g. 90"
+              error={errors.durationMinutes}
+              registration={{
+                ...f,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const v = e.target.value;
+                  f.onChange(v === "" ? undefined : Number(v));
+                },
+                value: f.value === undefined ? "" : String(f.value),
+              }}
+            />
+          )}
+        />
+
+        {/* Performance Count */}
+        <Controller
+          name="performanceCount"
+          control={control}
+          render={({ field: f }) => (
+            <NumberField
+              id="performanceCount"
+              label="Number of Performances"
+              min={1}
+              max={20}
+              placeholder="e.g. 1"
+              error={errors.performanceCount}
+              registration={{
+                ...f,
+                onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const v = e.target.value;
+                  f.onChange(v === "" ? undefined : Number(v));
+                },
+                value: f.value === undefined ? "" : String(f.value),
+              }}
+            />
+          )}
+        />
+
+        {/* Genre */}
+        <TextField
+          id="genre"
+          label="Genre / Style"
+          optional
+          placeholder="e.g. Bollywood, EDM"
+          error={errors.genre}
+          registration={register("genre")}
+        />
+
+        {/* Estimate breakup delivery note */}
+        {performanceType && (
+          <div className="flex items-center gap-2 p-3 bg-violet-50/70 border border-violet-100 rounded-xl text-xs text-violet-800">
+            <ReceiptText className="w-4 h-4 text-violet-600 flex-shrink-0" />
+            <span>
+              Performer rate card and estimated total breakup will be generated in your Estimate Breakups dashboard upon submission.
+            </span>
+          </div>
+        )}
+      </div>
+    </form>
   );
 }
+
+// ---------------------------------------------------------------------------
+// PerformerStep3 — unchanged, uses generic renderer
+// ---------------------------------------------------------------------------
 
 interface PerformerStep3Props {
   formId: string;
@@ -109,7 +222,7 @@ export function PerformerStep3({ formId, defaultValues, onSubmit }: PerformerSte
         specialInstructions: defaultValues.specialInstructions ?? "",
         budgetMin: defaultValues.budgetMin,
         budgetMax: defaultValues.budgetMax,
-        budgetCurrency: defaultValues.budgetCurrency ?? "INR",
+        budgetCurrency: "INR",
       }}
       fields={STEP3_FIELDS}
       onSubmit={onSubmit}

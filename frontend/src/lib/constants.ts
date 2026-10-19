@@ -86,3 +86,40 @@ export const STEP_TITLES: Record<string, [string, string]> = {
   performer: ["Performance Details", "Technical Requirements"],
   crew: ["Staffing Requirements", "Work Details"],
 };
+
+// ---------------------------------------------------------------------------
+// Estimated price data — INR only, for display purposes
+// ---------------------------------------------------------------------------
+
+/** Per-service estimated fee for event planners (₹ INR) */
+export const SERVICE_PRICES: Record<string, number> = {
+  venue_selection: 15000,
+  decoration_theme: 25000,
+  catering_coordination: 20000,
+  vendor_management: 18000,
+  guest_management: 12000,
+  complete_event_planning: 75000,
+};
+
+/** Base rate per performance (₹ INR) for performers */
+export const PERFORMER_BASE_RATES: Record<string, number> = {
+  singer: 15000,
+  dj: 20000,
+  live_band: 40000,
+  dancer: 8000,
+  instrumentalist: 12000,
+  comedian: 25000,
+  other: 10000,
+};
+
+/** Hourly rate per crew member (₹ INR) */
+export const CREW_ROLE_RATES: Record<string, number> = {
+  sound_technician: 500,
+  lighting_technician: 450,
+  stagehand: 300,
+  photographer: 800,
+  videographer: 1000,
+  security_staff: 350,
+  setup_logistics: 300,
+  other: 350,
+};

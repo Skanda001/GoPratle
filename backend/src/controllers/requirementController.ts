@@ -23,7 +23,7 @@ export async function createRequirement(
         ? req.headers["idempotency-key"]
         : undefined;
 
-    const { doc, created } = await service.createRequirement(req.body, idempotencyKey);
+    const { doc, created } = await service.createRequirement(req.body, idempotencyKey, req.user);
 
     res.status(created ? 201 : 200).json(
       sendSuccess(
@@ -36,6 +36,27 @@ export async function createRequirement(
       res.status(400).json(sendValidationError(err.errors));
       return;
     }
+    next(err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/requirements/my (requires auth)
+// ---------------------------------------------------------------------------
+export async function getMyRequirements(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    if (!req.user) {
+      res.status(401).json(sendError("Authentication required"));
+      return;
+    }
+
+    const docs = await service.getUserRequirements(req.user.userId);
+    res.status(200).json(sendSuccess("User requirements retrieved successfully", docs));
+  } catch (err) {
     next(err);
   }
 }

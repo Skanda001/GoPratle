@@ -4,6 +4,7 @@ import cors from "cors";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import requirementRoutes from "./routes/requirementRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { notFoundHandler } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -29,7 +30,7 @@ app.use(
       }
     },
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Idempotency-Key"],
+    allowedHeaders: ["Content-Type", "Idempotency-Key", "Authorization"],
   })
 );
 
@@ -48,6 +49,7 @@ if (env.NODE_ENV !== "test") {
 // ---------------------------------------------------------------------------
 // Routes
 // ---------------------------------------------------------------------------
+app.use("/api/auth", authRoutes);
 app.use("/api", requirementRoutes);
 
 // ---------------------------------------------------------------------------

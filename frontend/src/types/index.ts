@@ -51,6 +51,7 @@ export type CrewRole =
 export interface BasicsFormData {
   eventName: string;
   eventType: EventType;
+  eventTypeOther?: string;
   dateMode: DateMode;
   startDate: string;
   endDate?: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Edit2 } from "lucide-react";
+import { Edit2, ReceiptText } from "lucide-react";
 import {
   EVENT_TYPE_LABELS,
   CATEGORY_LABELS,
@@ -238,6 +238,19 @@ export function Step4Review({
       {category === "crew" && (
         <CrewReview details={crewDetails} onEdit={onEdit} />
       )}
+
+      {/* Notice: Estimate breakup is generated in Estimate Breakups dashboard */}
+      <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-4 flex items-start gap-3 text-sm">
+        <ReceiptText className="w-5 h-5 text-violet-600 flex-shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="font-semibold text-violet-900">
+            Itemized Price Estimate Breakup
+          </p>
+          <p className="text-slate-600 text-xs leading-relaxed">
+            Upon submitting this requirement, a full itemized price breakup, role allocations, and talent quotes will be generated directly in your Estimate Breakups dashboard.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

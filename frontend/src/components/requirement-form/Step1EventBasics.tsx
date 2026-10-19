@@ -61,6 +61,7 @@ export function Step1EventBasics({ defaultValues, onSubmit, formId }: Step1Props
     defaultValues: {
       eventName: defaultValues.eventName ?? "",
       eventType: defaultValues.eventType,
+      eventTypeOther: defaultValues.eventTypeOther ?? "",
       dateMode: defaultValues.dateMode ?? "single",
       startDate: defaultValues.startDate ?? "",
       endDate: defaultValues.endDate ?? "",
@@ -72,6 +73,7 @@ export function Step1EventBasics({ defaultValues, onSubmit, formId }: Step1Props
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const dateMode = watch("dateMode");
+  const eventType = watch("eventType");
   const today = getTodayString();
 
   return (
@@ -95,6 +97,17 @@ export function Step1EventBasics({ defaultValues, onSubmit, formId }: Step1Props
           error={errors.eventType}
           registration={register("eventType")}
         />
+
+        {/* "Other" event type follow-up */}
+        {eventType === "other" && (
+          <TextField
+            id="eventTypeOther"
+            label="Please describe your event type"
+            placeholder="e.g. Networking Mixer, Product Launch..."
+            error={errors.eventTypeOther}
+            registration={register("eventTypeOther")}
+          />
+        )}
 
         {/* Date Mode */}
         <div>

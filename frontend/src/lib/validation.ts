@@ -43,6 +43,11 @@ export const basicsSchema = z
       ],
       { required_error: "Please select an event type" }
     ),
+    eventTypeOther: z
+      .string()
+      .trim()
+      .max(100, "Must be 100 characters or less")
+      .optional(),
     dateMode: z.enum(["single", "range"], { required_error: "Please select a date mode" }),
     startDate: dateOnlyString,
     endDate: z.string().optional(),
@@ -57,6 +62,14 @@ export const basicsSchema = z
     }),
   })
   .superRefine((data, ctx) => {
+    // Require eventTypeOther when eventType is "other"
+    if (data.eventType === "other" && !data.eventTypeOther?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["eventTypeOther"],
+        message: "Please describe your event type",
+      });
+    }
     // Client-side date validation: check start isn't more than 1 day in the past
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);

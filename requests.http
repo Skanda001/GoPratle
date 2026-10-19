@@ -1,0 +1,315 @@
+### GoPratle API — REST Client Sample Requests
+### Uses VS Code REST Client extension (humao.rest-client)
+### Set @baseUrl to your running backend before executing
+
+@baseUrl = http://localhost:5000
+@contentType = application/json
+
+# ──────────────────────────────────────────
+# Health
+# ──────────────────────────────────────────
+
+### Health check
+GET {{baseUrl}}/api/health
+Content-Type: {{contentType}}
+
+###
+
+# ──────────────────────────────────────────
+# POST — Create Planner Requirement
+# ──────────────────────────────────────────
+
+### Create planner (single date)
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+Idempotency-Key: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+{
+  "eventName": "Annual Corporate Gala",
+  "eventType": "corporate_event",
+  "dateMode": "single",
+  "startDate": "2026-12-20",
+  "location": "Mumbai",
+  "venue": "Taj Mahal Palace",
+  "category": "planner",
+  "details": {
+    "guestCount": 250,
+    "budget": 500000,
+    "currency": "INR",
+    "servicesRequired": ["catering_coordination", "decoration_theme", "vendor_management"],
+    "styleTheme": "Black Tie",
+    "planningScope": "full_planning",
+    "coordinationDays": 1,
+    "preferredExperience": "experienced",
+    "specialRequests": "Require a Jain-friendly catering option."
+  }
+}
+
+###
+
+### Create planner (date range)
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+Idempotency-Key: b2c3d4e5-f6a7-8901-bcde-f12345678901
+
+{
+  "eventName": "Three-Day Wedding Celebration",
+  "eventType": "wedding",
+  "dateMode": "range",
+  "startDate": "2026-12-15",
+  "endDate": "2026-12-17",
+  "location": "Udaipur, Rajasthan",
+  "venue": "City Palace",
+  "category": "planner",
+  "details": {
+    "guestCount": 500,
+    "budget": 2000000,
+    "currency": "INR",
+    "servicesRequired": ["venue_selection", "decoration_theme", "catering_coordination", "guest_management"],
+    "styleTheme": "Royal Rajasthani",
+    "planningScope": "full_planning",
+    "coordinationDays": 3,
+    "preferredExperience": "experienced"
+  }
+}
+
+###
+
+# ──────────────────────────────────────────
+# POST — Create Performer Requirement
+# ──────────────────────────────────────────
+
+### Create performer requirement
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+Idempotency-Key: c3d4e5f6-a7b8-9012-cdef-123456789012
+
+{
+  "eventName": "College Farewell Night",
+  "eventType": "college_fest",
+  "dateMode": "single",
+  "startDate": "2026-11-30",
+  "location": "Pune",
+  "venue": "MIT College Auditorium",
+  "category": "performer",
+  "details": {
+    "performanceType": "live_band",
+    "performerCount": 5,
+    "durationMinutes": 90,
+    "performanceCount": 1,
+    "genre": "Bollywood / Indie Rock",
+    "soundSystemRequired": true,
+    "lightingRequired": true,
+    "stageRequired": true,
+    "equipmentRequirements": "Full backline provided by venue. Band brings own instruments.",
+    "specialInstructions": "Must include 3 Hindi songs from 90s era.",
+    "budgetMin": 50000,
+    "budgetMax": 80000,
+    "budgetCurrency": "INR"
+  }
+}
+
+###
+
+### Create performer — DJ
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+Idempotency-Key: d4e5f6a7-b8c9-0123-defa-234567890123
+
+{
+  "eventName": "Birthday Bash",
+  "eventType": "birthday",
+  "dateMode": "single",
+  "startDate": "2026-11-22",
+  "location": "Delhi",
+  "category": "performer",
+  "details": {
+    "performanceType": "dj",
+    "performerCount": 1,
+    "durationMinutes": 240,
+    "performanceCount": 1,
+    "genre": "House / EDM",
+    "soundSystemRequired": true,
+    "lightingRequired": false,
+    "stageRequired": false,
+    "budgetMin": 20000,
+    "budgetMax": 35000,
+    "budgetCurrency": "INR"
+  }
+}
+
+###
+
+# ──────────────────────────────────────────
+# POST — Create Crew Requirement
+# ──────────────────────────────────────────
+
+### Create crew requirement
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+Idempotency-Key: e5f6a7b8-c9d0-1234-efab-345678901234
+
+{
+  "eventName": "Tech Summit 2026",
+  "eventType": "corporate_event",
+  "dateMode": "range",
+  "startDate": "2026-12-05",
+  "endDate": "2026-12-06",
+  "location": "Bengaluru",
+  "venue": "BIEC Exhibition Centre",
+  "category": "crew",
+  "details": {
+    "roles": ["sound_technician", "lighting_technician", "stagehand", "photographer", "videographer"],
+    "crewCount": 15,
+    "shiftHours": 10,
+    "shiftCount": 2,
+    "experienceLevel": "intermediate",
+    "equipmentRequired": "Venue provides AV rack; crew brings personal tools.",
+    "dressCode": "All black",
+    "reportingInstructions": "Report to Stage Manager at Gate 3 by 07:00.",
+    "specialRequests": "Fluent Hindi/English speakers preferred."
+  }
+}
+
+###
+
+# ──────────────────────────────────────────
+# GET — List Requirements
+# ──────────────────────────────────────────
+
+### List all (page 1, default limit 10)
+GET {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+
+###
+
+### Filter by category
+GET {{baseUrl}}/api/requirements?category=planner
+Content-Type: {{contentType}}
+
+###
+
+### Paginate
+GET {{baseUrl}}/api/requirements?page=2&limit=5
+Content-Type: {{contentType}}
+
+###
+
+### Filter + paginate
+GET {{baseUrl}}/api/requirements?category=performer&page=1&limit=20
+Content-Type: {{contentType}}
+
+###
+
+# ──────────────────────────────────────────
+# GET — Single Requirement
+# ──────────────────────────────────────────
+
+### Get by ID (replace with a real _id from a POST response)
+GET {{baseUrl}}/api/requirements/000000000000000000000001
+Content-Type: {{contentType}}
+
+###
+
+### Malformed ID — expect 404
+GET {{baseUrl}}/api/requirements/not-a-valid-id
+Content-Type: {{contentType}}
+
+###
+
+# ──────────────────────────────────────────
+# Error cases
+# ──────────────────────────────────────────
+
+### Missing required field — expect 400
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+
+{
+  "eventType": "wedding",
+  "dateMode": "single",
+  "startDate": "2026-12-20",
+  "location": "Chennai",
+  "category": "planner",
+  "details": {
+    "guestCount": 100,
+    "servicesRequired": ["catering_coordination"],
+    "planningScope": "full_planning",
+    "coordinationDays": 1
+  }
+}
+
+###
+
+### Past date — expect 400
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+
+{
+  "eventName": "Old Event",
+  "eventType": "birthday",
+  "dateMode": "single",
+  "startDate": "2020-01-01",
+  "location": "Hyderabad",
+  "category": "planner",
+  "details": {
+    "guestCount": 50,
+    "servicesRequired": ["catering_coordination"],
+    "planningScope": "day_of_coordination",
+    "coordinationDays": 1
+  }
+}
+
+###
+
+### Cross-category fields — expect 400 (planner details sent with performer category)
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+
+{
+  "eventName": "Mixed Up Event",
+  "eventType": "concert",
+  "dateMode": "single",
+  "startDate": "2026-12-20",
+  "location": "Mumbai",
+  "category": "performer",
+  "details": {
+    "guestCount": 300,
+    "servicesRequired": ["catering_coordination"],
+    "planningScope": "full_planning",
+    "coordinationDays": 1
+  }
+}
+
+###
+
+### Idempotency replay — same key, expect 200 (not 201)
+POST {{baseUrl}}/api/requirements
+Content-Type: {{contentType}}
+Idempotency-Key: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+{
+  "eventName": "Annual Corporate Gala",
+  "eventType": "corporate_event",
+  "dateMode": "single",
+  "startDate": "2026-12-20",
+  "location": "Mumbai",
+  "venue": "Taj Mahal Palace",
+  "category": "planner",
+  "details": {
+    "guestCount": 250,
+    "budget": 500000,
+    "currency": "INR",
+    "servicesRequired": ["catering_coordination"],
+    "planningScope": "full_planning",
+    "coordinationDays": 1
+  }
+}
+
+###
+
+### Unknown route — expect JSON 404
+GET {{baseUrl}}/api/does-not-exist
+Content-Type: {{contentType}}
+
+###

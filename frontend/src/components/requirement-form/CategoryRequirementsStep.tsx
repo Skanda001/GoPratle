@@ -234,24 +234,33 @@ export function CategoryRequirementsStep({
                 name={field.amountName}
                 control={control}
                 render={({ field: amountField }) => (
-                  <CurrencyAmountField
-                    id={field.amountName}
-                    label={field.label}
-                    optional={field.optional}
-                    hint={field.hint}
-                    amountError={amountError}
-                    currencyError={currencyError}
-                    currencies={field.currencies}
-                    className={field.className}
-                    amountRegistration={{
-                      ...amountField,
-                      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                        const v = e.target.value;
-                        amountField.onChange(v === "" ? undefined : Number(v));
-                      },
-                      value: amountField.value === undefined ? "" : String(amountField.value),
-                    }}
-                    currencyRegistration={register(field.currencyName)}
+                  <Controller
+                    name={field.currencyName}
+                    control={control}
+                    render={({ field: currencyField }) => (
+                      <CurrencyAmountField
+                        id={field.amountName}
+                        label={field.label}
+                        optional={field.optional}
+                        hint={field.hint}
+                        amountError={amountError}
+                        currencyError={currencyError}
+                        currencies={field.currencies}
+                        className={field.className}
+                        amountRegistration={{
+                          ...amountField,
+                          onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                            const v = e.target.value;
+                            amountField.onChange(v === "" ? undefined : Number(v));
+                          },
+                          value: amountField.value === undefined ? "" : String(amountField.value),
+                        }}
+                        currencyRegistration={{
+                          ...currencyField,
+                          value: currencyField.value ?? "INR",
+                        }}
+                      />
+                    )}
                   />
                 )}
               />

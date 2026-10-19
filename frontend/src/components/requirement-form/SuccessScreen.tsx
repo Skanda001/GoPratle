@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, Copy, Check, Plus } from "lucide-react";
+import { CheckCircle2, Copy, Check, Plus, ReceiptText, Clock } from "lucide-react";
 import { CATEGORY_LABELS, EVENT_TYPE_LABELS } from "@/lib/constants";
 import { formatDateRange } from "@/lib/utils";
 import type { Category, EventType, DateMode } from "@/types";
@@ -15,6 +15,9 @@ interface SuccessScreenProps {
   endDate: string | undefined;
   dateMode: DateMode;
   onCreateAnother: () => void;
+  onViewEstimates?: () => void;
+  onViewEmail?: () => void;
+  onViewHistory?: () => void;
 }
 
 export function SuccessScreen({
@@ -26,6 +29,9 @@ export function SuccessScreen({
   endDate,
   dateMode,
   onCreateAnother,
+  onViewEstimates,
+  onViewEmail,
+  onViewHistory,
 }: SuccessScreenProps) {
   const [copied, setCopied] = React.useState(false);
 
@@ -40,15 +46,15 @@ export function SuccessScreen({
   }
 
   return (
-    <div className="flex flex-col items-center text-center py-10 px-4 gap-6">
+    <div className="flex flex-col items-center text-center py-8 px-4 gap-5">
       <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
         <CheckCircle2 className="w-9 h-9 text-green-500" aria-hidden="true" />
       </div>
 
       <div className="space-y-1">
-        <h2 className="text-2xl font-bold text-slate-900">Requirement Submitted!</h2>
+        <h2 className="text-2xl font-bold text-slate-900">Order Placed Successfully!</h2>
         <p className="text-slate-500 text-sm max-w-sm">
-          Your requirement has been saved. Matching professionals will be able to see your posting.
+          Your event requirement is registered. We have notified verified event professionals.
         </p>
       </div>
 
@@ -65,6 +71,19 @@ export function SuccessScreen({
           >
             {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
           </button>
+        </div>
+      </div>
+
+      {/* Estimate Breakup Alert */}
+      <div className="w-full max-w-sm rounded-xl border border-violet-100 bg-violet-50/70 p-4 text-left flex items-start gap-3">
+        <ReceiptText className="w-5 h-5 text-violet-600 flex-shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="text-xs font-semibold text-violet-900 uppercase tracking-wide">
+            Estimate Breakup Generated
+          </p>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            An itemized price estimate breakup and talent quotation have been generated for your order.
+          </p>
         </div>
       </div>
 
@@ -90,12 +109,36 @@ export function SuccessScreen({
         </div>
       </div>
 
+      {/* Action buttons */}
+      <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-sm">
+        {(onViewEstimates || onViewEmail) && (
+          <button
+            type="button"
+            onClick={onViewEstimates || onViewEmail}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors shadow-sm"
+          >
+            <ReceiptText className="w-4 h-4" />
+            View Estimate Breakup
+          </button>
+        )}
+        {onViewHistory && (
+          <button
+            type="button"
+            onClick={onViewHistory}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+          >
+            <Clock className="w-4 h-4" />
+            Order History
+          </button>
+        )}
+      </div>
+
       <button
         type="button"
         onClick={onCreateAnother}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-violet-200 text-violet-700 text-sm font-medium hover:bg-violet-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+        className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-violet-600 font-medium transition-colors pt-1"
       >
-        <Plus className="w-4 h-4" />
+        <Plus className="w-3.5 h-3.5" />
         Create Another Requirement
       </button>
     </div>

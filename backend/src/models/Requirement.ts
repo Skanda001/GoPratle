@@ -132,6 +132,8 @@ export interface BaseRequirementFields {
   venue?: string;
   status: Status;
   idempotencyKey?: string;
+  userId?: string;
+  userEmail?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -159,6 +161,8 @@ const baseSchema = new Schema<RequirementDocument>(
     venue: { type: String, trim: true, maxlength: 100 },
     status: { type: String, enum: STATUSES, default: "submitted" },
     idempotencyKey: { type: String },
+    userId: { type: Schema.Types.ObjectId, ref: "User", sparse: true },
+    userEmail: { type: String, sparse: true },
   },
   {
     timestamps: true,
@@ -168,6 +172,7 @@ const baseSchema = new Schema<RequirementDocument>(
 
 // Indexes
 baseSchema.index({ category: 1, createdAt: -1 });
+baseSchema.index({ userId: 1, createdAt: -1 }, { sparse: true });
 baseSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
 
 // Disable lean documents returning __v

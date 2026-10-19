@@ -6,6 +6,7 @@ const SLOW_THRESHOLD_MS = 8_000;
 
 export interface SubmitOptions {
   idempotencyKey: string;
+  token?: string;
   onSlowRequest?: () => void;
 }
 
@@ -17,20 +18,33 @@ export interface ApiResult<T> {
   fieldErrors: { field: string; message: string }[];
 }
 
+export interface UserResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+export interface AuthResponse {
+  user: UserResponse;
+  token: string;
+}
+
 // ---------------------------------------------------------------------------
 // Core fetch wrapper with AbortController timeout + slow-request callback
 // ---------------------------------------------------------------------------
 
 async function apiFetch<T>(
   path: string,
-  init: RequestInit & { idempotencyKey?: string } = {}
+  init: RequestInit & { idempotencyKey?: string; token?: string } = {}
 ): Promise<{ status: number; body: T }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(init.idempotencyKey ? { "Idempotency-Key": init.idempotencyKey } : {}),
+    ...(init.token ? { Authorization: `Bearer ${init.token}` } : {}),
   };
 
   try {
@@ -49,8 +63,122 @@ async function apiFetch<T>(
 }
 
 // ---------------------------------------------------------------------------
+// Auth APIs
+// ---------------------------------------------------------------------------
+
+export async function registerUser(
+  name: string,
+  email: string,
+  password: string
+): Promise<ApiResult<AuthResponse>> {
+  try {
+    const { status, body } = await apiFetch<
+      | { success: true; message: string; data: AuthResponse }
+      | { success: false; message: string; errors?: { field: string; message: string }[] }
+    >("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (body.success) {
+      return { ok: true, status, data: body.data, error: null, fieldErrors: [] };
+    }
+    return {
+      ok: false,
+      status,
+      data: null,
+      error: body.message,
+      fieldErrors: body.errors ?? [],
+    };
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: "Unable to connect to server. Please try again.",
+      fieldErrors: [],
+    };
+  }
+}
+
+export async function loginUser(
+  email: string,
+  password: string
+): Promise<ApiResult<AuthResponse>> {
+  try {
+    const { status, body } = await apiFetch<
+      | { success: true; message: string; data: AuthResponse }
+      | { success: false; message: string; errors?: { field: string; message: string }[] }
+    >("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (body.success) {
+      return { ok: true, status, data: body.data, error: null, fieldErrors: [] };
+    }
+    return {
+      ok: false,
+      status,
+      data: null,
+      error: body.message,
+      fieldErrors: body.errors ?? [],
+    };
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      data: null,
+      error: "Unable to connect to server. Please check your connection.",
+      fieldErrors: [],
+    };
+  }
+}
+
+export async function getMe(token: string): Promise<ApiResult<{ user: UserResponse }>> {
+  try {
+    const { status, body } = await apiFetch<
+      | { success: true; data: { user: UserResponse } }
+      | { success: false; message: string }
+    >("/auth/me", {
+      method: "GET",
+      token,
+    });
+
+    if (body.success) {
+      return { ok: true, status, data: body.data, error: null, fieldErrors: [] };
+    }
+    return { ok: false, status, data: null, error: body.message, fieldErrors: [] };
+  } catch {
+    return { ok: false, status: 0, data: null, error: "Network error", fieldErrors: [] };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// GET /requirements/my
+// ---------------------------------------------------------------------------
+
+export async function getMyRequirements(token: string): Promise<ApiResult<RequirementRecord[]>> {
+  try {
+    const { status, body } = await apiFetch<
+      | { success: true; message: string; data: RequirementRecord[] }
+      | { success: false; message: string }
+    >("/requirements/my", {
+      method: "GET",
+      token,
+    });
+
+    if (body.success) {
+      return { ok: true, status, data: body.data, error: null, fieldErrors: [] };
+    }
+    return { ok: false, status, data: null, error: body.message, fieldErrors: [] };
+  } catch {
+    return { ok: false, status: 0, data: null, error: "Network error", fieldErrors: [] };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // POST /requirements
-// Retries once on network failure / timeout / 503 (idempotency makes it safe)
 // ---------------------------------------------------------------------------
 
 export async function submitRequirement(
@@ -72,6 +200,7 @@ export async function submitRequirement(
         method: "POST",
         body: JSON.stringify(payload),
         idempotencyKey: options.idempotencyKey,
+        token: options.token,
       });
 
       if (body.success) {
@@ -104,11 +233,9 @@ export async function submitRequirement(
     }
   };
 
-  // First attempt
   const result = await attempt();
   if (slowTimer) clearTimeout(slowTimer);
 
-  // Retry once on network failure or 503
   if (!result.ok && (result.status === 0 || result.status === 503)) {
     return attempt();
   }

@@ -222,10 +222,12 @@ interface ChipMultiSelectProps {
   options: SelectOption[];
   value: string[];
   onChange: (value: string[]) => void;
+  /** Optional price map: option value → INR amount. Shown as compact badge on each chip. */
+  prices?: Record<string, number>;
   className?: string;
 }
 
-export function ChipMultiSelect({ id, label, optional, hint, error, options, value, onChange, className }: ChipMultiSelectProps) {
+export function ChipMultiSelect({ id, label, optional, hint, error, options, value, onChange, prices, className }: ChipMultiSelectProps) {
   const errorId = error ? `${id}-error` : undefined;
   const hintId = hint ? `${id}-hint` : undefined;
 
@@ -235,6 +237,13 @@ export function ChipMultiSelect({ id, label, optional, hint, error, options, val
     } else {
       onChange([...value, optValue]);
     }
+  }
+
+  /** Compact INR abbreviation for chip badges */
+  function compactPrice(amount: number): string {
+    if (amount >= 100000) return `₹${(amount / 100000).toFixed(amount % 100000 === 0 ? 0 : 1)}L`;
+    if (amount >= 1000) return `₹${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}K`;
+    return `₹${amount}`;
   }
 
   return (
@@ -251,6 +260,7 @@ export function ChipMultiSelect({ id, label, optional, hint, error, options, val
       >
         {options.map((opt) => {
           const checked = value.includes(opt.value);
+          const price = prices?.[opt.value];
           return (
             <label
               key={opt.value}
@@ -268,10 +278,18 @@ export function ChipMultiSelect({ id, label, optional, hint, error, options, val
                 onChange={() => toggle(opt.value)}
                 aria-label={opt.label}
               />
-              {opt.value === "complete_event_planning" ? (
-                <span>{opt.label}</span>
-              ) : (
-                <span>{opt.label}</span>
+              <span>{opt.label}</span>
+              {price !== undefined && (
+                <span
+                  className={[
+                    "text-xs px-1.5 py-0.5 rounded-full font-normal",
+                    checked
+                      ? "bg-violet-100 text-violet-600"
+                      : "bg-slate-100 text-slate-500",
+                  ].join(" ")}
+                >
+                  {compactPrice(price)}
+                </span>
               )}
             </label>
           );

@@ -31,7 +31,8 @@ function getModelForCategory(category: Category) {
 // ---------------------------------------------------------------------------
 export async function createRequirement(
   body: unknown,
-  idempotencyKey?: string
+  idempotencyKey?: string,
+  user?: { userId: string; email: string }
 ): Promise<{ doc: RequirementDocument; created: boolean }> {
   // Validate with Zod
   const parsed = requirementValidator.safeParse(body);
@@ -62,12 +63,20 @@ export async function createRequirement(
     ...(data.venue !== undefined && { venue: data.venue }),
     ...(data.dateMode === "range" && data.endDate !== undefined && { endDate: data.endDate }),
     ...(idempotencyKey && { idempotencyKey }),
+    ...(user && { userId: user.userId, userEmail: user.email }),
   };
 
   // Using Model as any to work around TypeScript's union call signature incompatibility
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const created = await (Model as any).create(docData) as RequirementDocument;
   return { doc: created.toObject ? created.toObject() as RequirementDocument : created, created: true };
+}
+
+// ---------------------------------------------------------------------------
+// Get user requirements
+// ---------------------------------------------------------------------------
+export async function getUserRequirements(userId: string): Promise<RequirementDocument[]> {
+  return RequirementModel.find({ userId }).sort({ createdAt: -1 }).lean<RequirementDocument[]>();
 }
 
 // ---------------------------------------------------------------------------
